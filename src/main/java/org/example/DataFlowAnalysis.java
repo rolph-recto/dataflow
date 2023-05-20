@@ -67,7 +67,13 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
 
         // assume that CFG blocks are atomic (contains either 0 or 1 statements)
         if (block.statements.size() == 0) {
-            return input;
+            // if there is a conditional jump, apply transfer function of the guard
+            if (block.jump instanceof ConditionalJump) {
+                return transfer(((ConditionalJump)block.jump).guard, input);
+
+            } else {
+                return input;
+            }
 
         } else if (block.statements.size() == 1) {
             return transfer(block.statements.element(), input);
@@ -77,6 +83,9 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
         }
     }
 
-    /** Transfer function for a basic block. */
-    abstract T transfer(Statement statement, T input);
+    /** Transfer function for a statement. */
+    abstract T transfer(AtomicStatement statement, T input);
+
+    /** Transfer function for a conditional / loop guard. */
+    abstract T transfer(Expression guard, T input);
 }

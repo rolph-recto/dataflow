@@ -6,6 +6,28 @@ abstract class Statement {
     abstract <T> T visit(StatementVisitor<T> visitor);
 }
 
+abstract class AtomicStatement extends Statement {}
+
+class Assign extends AtomicStatement {
+    String var;
+    Expression rhs;
+
+    Assign(String var, Expression rhs) {
+        this.var = var;
+        this.rhs = rhs;
+    }
+
+    @Override
+    <T> T visit(StatementVisitor<T> v) {
+        return v.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s := %s", this.var, this.rhs.toString());
+    }
+}
+
 class Block extends Statement {
     ArrayList<Statement> statements;
 
@@ -32,25 +54,6 @@ class Block extends Statement {
     }
 }
 
-class Assign extends Statement {
-    String var;
-    Expression rhs;
-
-    Assign(String var, Expression rhs) {
-        this.var = var;
-        this.rhs = rhs;
-    }
-
-    @Override
-    <T> T visit(StatementVisitor<T> v) {
-        return v.visit(this);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s := %s", this.var, this.rhs.toString());
-    }
-}
 
 class Conditional extends Statement {
     Expression guard;

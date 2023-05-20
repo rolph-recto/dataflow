@@ -92,10 +92,10 @@ class ConditionalJump extends Jump {
 
 class BasicBlock {
     int id;
-    LinkedList<Assign> statements;
+    LinkedList<AtomicStatement> statements;
     Jump jump;
 
-    BasicBlock(int id, LinkedList<Assign> statements, Jump jump) {
+    BasicBlock(int id, LinkedList<AtomicStatement> statements, Jump jump) {
         this.id = id;
         this.statements = statements;
         this.jump = jump;
@@ -132,7 +132,7 @@ class ControlFlowGraph {
         return id;
     }
 
-    BasicBlock createBlock(LinkedList<Assign> statements, Jump jump) {
+    BasicBlock createBlock(LinkedList<AtomicStatement> statements, Jump jump) {
         int id = freshBlockId();
         var block = new BasicBlock(id, statements, jump);
         this.blockMap.put(id, block);

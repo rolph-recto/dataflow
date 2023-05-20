@@ -21,8 +21,8 @@ abstract class CFGBuilder {
     protected abstract BasicBlock processStatements(Block statement, BasicBlock block);
 
     protected BasicBlock processStatement(Statement stmt, BasicBlock block) {
-        if (stmt instanceof Assign) {
-            block.statements.addFirst((Assign) stmt);
+        if (stmt instanceof AtomicStatement) {
+            block.statements.addFirst((AtomicStatement) stmt);
             return block;
 
         } else if (stmt instanceof Conditional) {
