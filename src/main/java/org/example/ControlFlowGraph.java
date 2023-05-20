@@ -1,19 +1,46 @@
 package org.example;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Vector;
+import java.util.*;
 
-abstract class Jump {}
+abstract class Jump {
+    /** Replace a target block ID. */
+    abstract void replaceTarget(Map<Integer,Integer> substMap);
 
-class Halt extends Jump {}
+    int computeFinalTarget(Map<Integer,Integer> substMap, int target) {
+        int cur = target;
+        while (substMap.containsKey(cur)) {
+            cur = substMap.get(cur);
+        }
+
+        return cur;
+    }
+}
+
+class Halt extends Jump {
+    @Override
+    public String toString() {
+        return "halt";
+    }
+
+    @Override
+    void replaceTarget(Map<Integer,Integer> substMap) {}
+}
 
 class UnconditionalJump extends Jump {
     int target;
 
     UnconditionalJump(int target) {
         this.target = target;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("goto %d", this.target);
+    }
+
+    @Override
+    void replaceTarget(Map<Integer,Integer> substMap) {
+        this.target = computeFinalTarget(substMap, this.target);
     }
 }
 
@@ -27,15 +54,47 @@ class ConditionalJump extends Jump {
         this.trueTarget = trueTarget;
         this.falseTarget = falseTarget;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "if (%s) then goto %d else goto %d",
+            this.guard.toString(),
+            this.trueTarget,
+            this.falseTarget
+        );
+    }
+
+    @Override
+    void replaceTarget(Map<Integer,Integer> substMap) {
+        this.trueTarget = computeFinalTarget(substMap, this.trueTarget);
+        this.falseTarget = computeFinalTarget(substMap, this.falseTarget);
+    }
 }
 
 class BasicBlock {
+    int id;
     LinkedList<Assign> statements;
     Jump jump;
 
-    BasicBlock(LinkedList<Assign> statements, Jump jump) {
+    BasicBlock(int id, LinkedList<Assign> statements, Jump jump) {
+        this.id = id;
         this.statements = statements;
         this.jump = jump;
+    }
+
+    @Override
+    public String toString() {
+        if (statements.size() > 0) {
+            return String.format(
+                "%s;\n%s",
+                new Block(new ArrayList<>(this.statements)).toString(),
+                this.jump
+            );
+
+        } else {
+            return this.jump.toString();
+        }
     }
 }
 
@@ -45,74 +104,58 @@ class ControlFlowGraph {
     HashMap<Integer, BasicBlock> blockMap;
 
     /** Build control flow graph from program. */
-    ControlFlowGraph(Vector<Statement> program) {
+    ControlFlowGraph() {
         this.blockMap = new HashMap<>();
-        var outContext =
-            processStatements(
-                program,
-                new BasicBlock(new LinkedList<>(), new Halt())
-            );
-
-        this.entryBlock = createBlock(outContext);
     }
 
-    private int freshBlockId()  {
+    int freshBlockId()  {
         int id = this.curBlockId;
         this.curBlockId += 1;
         return id;
     }
 
-    private int createBlock(BasicBlock block) {
+    BasicBlock createBlock(LinkedList<Assign> statements, Jump jump) {
         int id = freshBlockId();
+        var block = new BasicBlock(id, statements, jump);
         this.blockMap.put(id, block);
-        return id;
+        return block;
     }
 
-    private BasicBlock processStatements(Vector<Statement> stmts, BasicBlock block) {
-        BasicBlock curBlock = block;
-        for (int i = stmts.size() - 1; i >= 0; i --) {
-            curBlock = processStatement(stmts.get(i), curBlock);
-        }
-
-        return curBlock;
+    void setEntryBlock(int blockId) {
+        this.entryBlock = blockId;
     }
 
-    private BasicBlock processStatement(Statement stmt, BasicBlock block) {
-        if (stmt instanceof Assign) {
-            block.statements.addFirst((Assign)stmt);
-            return block;
-
-        } else if (stmt instanceof Conditional) {
-            int newBlockId = createBlock(block);
-
-            var inBlockThen = new BasicBlock(new LinkedList<>(), new UnconditionalJump(newBlockId));
-            var outContextThen = processStatements(((Conditional) stmt).thenBranch, inBlockThen);
-
-            var inBlockElse = new BasicBlock(new LinkedList<>(), new UnconditionalJump(newBlockId));
-            var outContextElse = processStatements(((Conditional) stmt).elseBranch, inBlockElse);
-
-            int thenBlockId = createBlock(outContextThen);
-            int elseBlockId = createBlock(outContextElse);
-
-            return new BasicBlock(
-                new LinkedList<>(),
-                new ConditionalJump(((Conditional)stmt).guard, thenBlockId, elseBlockId)
-            );
-
-        } else if (stmt instanceof While) {
-            int newBlockId = createBlock(block);
-
-            var inBlockBody = new BasicBlock(new LinkedList<>(), new UnconditionalJump(newBlockId));
-            var outContextBody = processStatements(((While)stmt).body, inBlockBody);
-
-            var bodyBlockId = createBlock(outContextBody);
-
-            return new BasicBlock(
-                new LinkedList<>(),
-                new ConditionalJump(((While)stmt).guard, bodyBlockId, newBlockId)
-            );
+    @Override
+    public String toString() {
+        var builder = new StringBuilder();
+        for (Map.Entry<Integer, BasicBlock> kv : this.blockMap.entrySet()) {
+            builder.append(kv.getKey());
+            builder.append('\n');
+            builder.append(kv.getValue());
+            builder.append("\n\n");
         }
 
-        throw new RuntimeException("unreachable");
+        return builder.toString();
+    }
+
+    void simplify() {
+        var substMap = new HashMap<Integer, Integer>();
+        for (Map.Entry<Integer, BasicBlock> kv : this.blockMap.entrySet()) {
+            var blockId = kv.getKey();
+            var block = kv.getValue();
+            if (block.statements.size() == 0 && block.jump instanceof UnconditionalJump) {
+                substMap.put(blockId, ((UnconditionalJump)block.jump).target);
+            }
+        }
+
+        // apply substitutions
+        for (Map.Entry<Integer, BasicBlock> kv : this.blockMap.entrySet()) {
+            kv.getValue().jump.replaceTarget(substMap);
+        }
+
+        // remove unused blocks
+        for (int blockId : substMap.keySet()) {
+            this.blockMap.remove(blockId);
+        }
     }
 }

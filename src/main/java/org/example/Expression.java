@@ -15,6 +15,11 @@ class Literal extends Expression {
     <T> T accept(ExpressionVisitor<T> visitor) {
         return visitor.visit(this);
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.val);
+    }
 }
 
 class Var extends Expression {
@@ -27,6 +32,11 @@ class Var extends Expression {
     @Override
     <T> T accept(ExpressionVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
     }
 }
 
@@ -43,6 +53,11 @@ class Add extends Expression {
     <T> T accept(ExpressionVisitor<T> visitor) {
         return visitor.visit(this);
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%s + %s)", this.lhs.toString(), this.rhs.toString());
+    }
 }
 
 class Multiply extends Expression {
@@ -57,5 +72,10 @@ class Multiply extends Expression {
     @Override
     <T> T accept(ExpressionVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%s * %s)", this.lhs.toString(), this.rhs.toString());
     }
 }

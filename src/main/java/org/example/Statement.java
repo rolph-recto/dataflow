@@ -1,9 +1,35 @@
 package org.example;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 abstract class Statement {
     abstract <T> T visit(StatementVisitor<T> visitor);
+}
+
+class Block extends Statement {
+    ArrayList<Statement> statements;
+
+    Block(ArrayList<Statement> statements) {
+        this.statements = statements;
+    }
+
+    @Override
+    <T> T visit(StatementVisitor<T> v) {
+        return v.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        var builder = new StringBuilder();
+        for (Statement s : this.statements) {
+            if (builder.length() > 0) {
+                builder.append(";\n");
+            }
+            builder.append(s.toString());
+        }
+
+        return builder.toString();
+    }
 }
 
 class Assign extends Statement {
@@ -19,14 +45,19 @@ class Assign extends Statement {
     <T> T visit(StatementVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s := %s", this.var, this.rhs.toString());
+    }
 }
 
 class Conditional extends Statement {
     Expression guard;
-    Vector<Statement> thenBranch;
-    Vector<Statement> elseBranch;
+    Block thenBranch;
+    Block elseBranch;
 
-    Conditional(Expression guard, Vector<Statement> thenBranch, Vector<Statement> elseBranch) {
+    Conditional(Expression guard, Block thenBranch, Block elseBranch) {
         this.guard = guard;
         this.thenBranch = thenBranch;
         this.elseBranch = elseBranch;
@@ -36,13 +67,23 @@ class Conditional extends Statement {
     <T> T visit(StatementVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "if (%s) then {\n%s\n} else {\n%s\n}",
+            this.guard.toString(),
+            this.thenBranch.toString(),
+            this.elseBranch.toString()
+        );
+    }
 }
 
 class While extends Statement {
     Expression guard;
-    Vector<Statement> body;
+    Block body;
 
-    While(Expression guard, Vector<Statement> body) {
+    While(Expression guard, Block body) {
         this.guard = guard;
         this.body = body;
     }
@@ -50,5 +91,10 @@ class While extends Statement {
     @Override
     <T> T visit(StatementVisitor<T> v) {
         return v.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("while (%s) {\n%s\n}", this.guard.toString(), this.body.toString());
     }
 }
