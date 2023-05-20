@@ -6,6 +6,9 @@ abstract class Jump {
     /** Replace a target block ID. */
     abstract void replaceTarget(Map<Integer,Integer> substMap);
 
+    /** Get the set of possible targets the jump refers to. */
+    abstract Set<Integer> possibleTargets();
+
     int computeFinalTarget(Map<Integer,Integer> substMap, int target) {
         int cur = target;
         while (substMap.containsKey(cur)) {
@@ -24,6 +27,11 @@ class Halt extends Jump {
 
     @Override
     void replaceTarget(Map<Integer,Integer> substMap) {}
+
+    @Override
+    Set<Integer> possibleTargets() {
+        return new HashSet<>();
+    }
 }
 
 class UnconditionalJump extends Jump {
@@ -41,6 +49,11 @@ class UnconditionalJump extends Jump {
     @Override
     void replaceTarget(Map<Integer,Integer> substMap) {
         this.target = computeFinalTarget(substMap, this.target);
+    }
+
+    @Override
+    Set<Integer> possibleTargets() {
+        return new HashSet<>(this.target);
     }
 }
 
@@ -70,6 +83,11 @@ class ConditionalJump extends Jump {
         this.trueTarget = computeFinalTarget(substMap, this.trueTarget);
         this.falseTarget = computeFinalTarget(substMap, this.falseTarget);
     }
+
+    @Override
+    Set<Integer> possibleTargets() {
+        return new HashSet<>(List.of(new Integer[]{this.trueTarget, this.falseTarget}));
+    }
 }
 
 class BasicBlock {
@@ -88,7 +106,7 @@ class BasicBlock {
         if (statements.size() > 0) {
             return String.format(
                 "%s;\n%s",
-                new Block(new ArrayList<>(this.statements)).toString(),
+                new Block(new ArrayList<>(this.statements)),
                 this.jump
             );
 
