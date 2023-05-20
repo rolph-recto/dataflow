@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 abstract class Jump {
     /** Replace a target block ID. */
@@ -143,13 +144,20 @@ class ControlFlowGraph {
         this.entryBlock = blockId;
     }
 
+    /** return a list of basic blocks (. */
+    List<BasicBlock> blockList() {
+        var idList = new ArrayList<Integer>(this.blockMap.keySet());
+        idList.sort(Collections.reverseOrder());
+        return idList.stream().map(id -> this.blockMap.get(id)).collect(Collectors.toList());
+    }
+
     @Override
     public String toString() {
         var builder = new StringBuilder();
-        for (Map.Entry<Integer, BasicBlock> kv : this.blockMap.entrySet()) {
-            builder.append(kv.getKey());
+        for (BasicBlock block : blockList()) {
+            builder.append(block.id);
             builder.append('\n');
-            builder.append(kv.getValue());
+            builder.append(block);
             builder.append("\n\n");
         }
 
