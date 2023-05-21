@@ -3,7 +3,7 @@ package org.example;
 import java.util.ArrayList;
 
 abstract class Statement {
-    abstract <T> T visit(StatementVisitor<T> visitor);
+    abstract <T> T accept(StatementVisitor<T> visitor);
 }
 
 abstract class AtomicStatement extends Statement {}
@@ -18,7 +18,7 @@ class Assign extends AtomicStatement {
     }
 
     @Override
-    <T> T visit(StatementVisitor<T> v) {
+    <T> T accept(StatementVisitor<T> v) {
         return v.visit(this);
     }
 
@@ -36,7 +36,7 @@ class Block extends Statement {
     }
 
     @Override
-    <T> T visit(StatementVisitor<T> v) {
+    <T> T accept(StatementVisitor<T> v) {
         return v.visit(this);
     }
 
@@ -67,7 +67,7 @@ class Conditional extends Statement {
     }
 
     @Override
-    <T> T visit(StatementVisitor<T> v) {
+    <T> T accept(StatementVisitor<T> v) {
         return v.visit(this);
     }
 
@@ -92,7 +92,7 @@ class While extends Statement {
     }
 
     @Override
-    <T> T visit(StatementVisitor<T> v) {
+    <T> T accept(StatementVisitor<T> v) {
         return v.visit(this);
     }
 

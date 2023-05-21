@@ -26,4 +26,15 @@ class DataFlowAnalysisTest {
             System.out.printf("%d => %s\n%s\n\n", block.id, solution.get(block.id), block);
         }
     }
+
+    @Test
+    public void testSignAnalysis() {
+        var cfg = new AtomicCFGBuilder().buildCFG(program1);
+        var signAnalysis = new SignAnalysis(cfg);
+        Map<Integer, Map<String, Sign>> solution = signAnalysis.analyze();
+
+        for (BasicBlock block : cfg.blockList()) {
+            System.out.printf("%d => %s\n%s\n\n", block.id, solution.get(block.id), block);
+        }
+    }
 }

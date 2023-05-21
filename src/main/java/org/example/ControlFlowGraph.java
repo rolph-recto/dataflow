@@ -54,7 +54,9 @@ class UnconditionalJump extends Jump {
 
     @Override
     Set<Integer> possibleTargets() {
-        return new HashSet<>(this.target);
+        var res = new HashSet<Integer>();
+        res.add(this.target);
+        return res;
     }
 }
 

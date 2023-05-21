@@ -8,6 +8,7 @@ interface TransferFunction<T> {
     T transfer(DataFlowVariable var, T input);
 }
 
+/** Indeterminate value used to express lattice equations. */
 class DataFlowVariable {
     private final int id;
 
@@ -86,8 +87,7 @@ class FixpointSolver {
 
         // initialize all variable solutions to bottom
         for (DataFlowVariable dfVar : this.children.keySet()) {
-            // the join of the empty set equals bottom
-            solution.put(dfVar, lattice.join(new HashSet<>()));
+            solution.put(dfVar, lattice.bottom());
             worklist.addLast(dfVar);
         }
 
