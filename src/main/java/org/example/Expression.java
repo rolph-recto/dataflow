@@ -160,8 +160,8 @@ class Multiply extends Expression {
             return true;
         }
 
-        if (other instanceof Add otherAdd) {
-            return Objects.equals(this.lhs, otherAdd.lhs) && Objects.equals(this.rhs, otherAdd.rhs);
+        if (other instanceof Multiply otherMul) {
+            return Objects.equals(this.lhs, otherMul.lhs) && Objects.equals(this.rhs, otherMul.rhs);
 
         } else {
             return false;

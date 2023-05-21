@@ -122,6 +122,7 @@ class BasicBlock {
 class ControlFlowGraph {
     int curBlockId;
     int entryBlock;
+    int exitBlock;
     HashMap<Integer, BasicBlock> blockMap;
 
     /** Build control flow graph from program. */
@@ -143,7 +144,13 @@ class ControlFlowGraph {
     }
 
     void setEntryBlock(int blockId) {
+        assert(this.blockMap.containsKey(blockId));
         this.entryBlock = blockId;
+    }
+
+    void setExitBlock(int blockId) {
+        assert(this.blockMap.containsKey(blockId));
+        this.exitBlock = blockId;
     }
 
     /** return a list of basic blocks (. */

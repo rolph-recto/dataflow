@@ -4,10 +4,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-/** Forward must-analysis that computes expressions that are *definitely* available at a program point. */
-class AvailableExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>, ReversePowersetLattice<Expression>> {
-    AvailableExpressionsAnalysis(ControlFlowGraph cfg) {
-        super(new ReversePowersetLattice<>(programExpressions(cfg)), cfg, DataFlowDirection.FORWARD);
+/** Backwards must-analysis that computes for every program point expressions that will definitely be computed
+ * again in the future. Similar to available expressions analysis, but backwards! */
+class VeryBusyExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>,ReversePowersetLattice<Expression>> {
+    VeryBusyExpressionsAnalysis(ControlFlowGraph cfg) {
+        super(new ReversePowersetLattice<>(programExpressions(cfg)), cfg, DataFlowDirection.BACKWARD);
     }
 
     private static Set<Expression> programExpressions(ControlFlowGraph cfg) {
@@ -23,7 +24,6 @@ class AvailableExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>, Rev
 
     @Override
     Set<Expression> initial() {
-        // no expressions are available at entry
         return new HashSet<>();
     }
 
@@ -33,7 +33,6 @@ class AvailableExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>, Rev
             // all complex expressions on the RHS of the assignment have been computed for the assignment,
             // and thus are available after the assignment
             var res = new HashSet<>(input);
-            res.addAll(assign.rhs.accept(new ComplexExpressions()));
 
             // must remove all expressions that use the newly assigned variable, since those expressions are now stale
             Iterator<Expression> iter = res.iterator();
@@ -44,6 +43,9 @@ class AvailableExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>, Rev
                     iter.remove();
                 }
             }
+
+            // finally, add all expressions computed from the RHS
+            res.addAll(assign.rhs.accept(new ComplexExpressions()));
 
             return res;
 

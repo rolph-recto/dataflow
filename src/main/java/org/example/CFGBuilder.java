@@ -11,10 +11,12 @@ abstract class CFGBuilder {
     }
 
     public ControlFlowGraph buildCFG(Block program) {
-        var endBlock = this.cfg.createBlock(new LinkedList<>(), new Halt());
-        var outContext = processStatements(program, endBlock);
+        var exitBlock = this.cfg.createBlock(new LinkedList<>(), new Halt());
+        var curBlock = this.cfg.createBlock(new LinkedList<>(), new UnconditionalJump(exitBlock.id));
+        var outContext = processStatements(program, curBlock);
         var entryBlock = this.cfg.createBlock(new LinkedList<>(), new UnconditionalJump(outContext.id));
         this.cfg.setEntryBlock(entryBlock.id);
+        this.cfg.setExitBlock(exitBlock.id);
         this.cfg.simplify();
         return this.cfg;
     }

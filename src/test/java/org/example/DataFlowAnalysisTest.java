@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Function;
-
 class DataFlowAnalysisTest {
     static Block program1 =
         new Block(new ArrayList<>(List.of(new Statement[] {
@@ -28,6 +27,20 @@ class DataFlowAnalysisTest {
                     new Assign("x", new Add(new Var("a"), new Var("b"))),
                 })))
             )
+        })));
+
+    static Block program3 =
+        new Block(new ArrayList<>(List.of(new Statement[] {
+            new Assign("a", new Add(new Var("x"), new Literal(1))),
+            new Assign("b", new Add(new Var("x"), new Literal(2))),
+            new While(
+                new Add(new Var("x"), new Literal(0)),
+                new Block(new ArrayList<>(List.of(new Statement[]{
+                    new Assign("output", new Add(new Multiply(new Var("a"), new Var("b")), new Var("x"))),
+                    new Assign("x", new Add(new Var("x"), new Literal(1))),
+                })))
+            ),
+            new Assign("output", new Multiply(new Var("a"), new Var("b")))
         })));
 
     private
@@ -55,5 +68,10 @@ class DataFlowAnalysisTest {
     @Test
     public void testAvailableExpressionsAnalysis() {
         testAnalysis(program2, AvailableExpressionsAnalysis::new);
+    }
+
+    @Test
+    public void testVeryBusyExpressionsAnalysis() {
+        testAnalysis(program3, VeryBusyExpressionsAnalysis::new);
     }
 }

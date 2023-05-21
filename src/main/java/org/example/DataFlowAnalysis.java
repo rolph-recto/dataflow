@@ -69,9 +69,14 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
     public T transfer(DataFlowVariable dfVar, T input) {
         var block = this.cfg.blockMap.get(this.blockVars.inverse().get(dfVar));
 
-        if (block.id == this.cfg.entryBlock) {
+        if (this.direction == DataFlowDirection.FORWARD && block.id == this.cfg.entryBlock) {
             assert(block.statements.size() == 0);
-            return entry();
+            return initial();
+        }
+
+        if (this.direction == DataFlowDirection.BACKWARD && block.id == this.cfg.exitBlock) {
+            assert(block.statements.size() == 0);
+            return initial();
         }
 
         // assume that CFG blocks are atomic (contains either 0 or 1 statements)
@@ -92,8 +97,9 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
         }
     }
 
-    /** Value for the entry block. By default, this is lattice.bottom(). */
-    T entry() {
+    /** Value for the entry (resp. exist) block for a forward (resp. backward) analysis.
+     *  By default, this is lattice.bottom(). */
+    T initial() {
         return this.lattice.bottom();
     }
 
