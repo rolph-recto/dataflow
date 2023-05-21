@@ -171,8 +171,13 @@ class ControlFlowGraph {
         for (Map.Entry<Integer, BasicBlock> kv : this.blockMap.entrySet()) {
             var blockId = kv.getKey();
             var block = kv.getValue();
-            if (block.statements.size() == 0 && block.jump instanceof UnconditionalJump) {
-                substMap.put(blockId, ((UnconditionalJump)block.jump).target);
+
+            // remove block and repoint all of its parent blocks if:
+            // - it is not the entry block
+            // - it is empty
+            // - it unconditionally jumps to another block
+            if (block.id != this.entryBlock && block.statements.size() == 0 && block.jump instanceof UnconditionalJump jump) {
+                substMap.put(blockId, jump.target);
             }
         }
 

@@ -87,6 +87,8 @@ class FixpointSolver {
 
         // initialize all variable solutions to bottom
         for (DataFlowVariable dfVar : this.children.keySet()) {
+            // System.out.printf("%s => %s\n", dfVar, this.children.get(dfVar));
+
             solution.put(dfVar, lattice.bottom());
             worklist.addLast(dfVar);
         }

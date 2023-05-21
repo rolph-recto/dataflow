@@ -52,6 +52,10 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
 
     /** Compute dataflow analysis. */
     HashMap<Integer, T> analyze() {
+        // for (Map.Entry<Integer,DataFlowVariable> kv : this.blockVars.entrySet()) {
+        //     System.out.printf("block %d => %s\n", kv.getKey(), kv.getValue());
+        // }
+
         var varSolution = this.solver.solve(this.lattice, this);
         var solution = new HashMap<Integer, T>();
         for (Map.Entry<DataFlowVariable, T> kv : varSolution.entrySet()) {
@@ -64,6 +68,11 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
     @Override
     public T transfer(DataFlowVariable dfVar, T input) {
         var block = this.cfg.blockMap.get(this.blockVars.inverse().get(dfVar));
+
+        if (block.id == this.cfg.entryBlock) {
+            assert(block.statements.size() == 0);
+            return entry();
+        }
 
         // assume that CFG blocks are atomic (contains either 0 or 1 statements)
         if (block.statements.size() == 0) {
@@ -81,6 +90,11 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
         } else {
             throw new RuntimeException("CFG used in dataflow analysis must be atomic");
         }
+    }
+
+    /** Value for the entry block. By default, this is lattice.bottom(). */
+    T entry() {
+        return this.lattice.bottom();
     }
 
     /** Transfer function for a statement. */

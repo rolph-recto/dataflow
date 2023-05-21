@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.Objects;
+
 abstract class Expression {
     abstract <T> T accept(ExpressionVisitor<T> visitor);
 }
@@ -20,6 +22,29 @@ class Literal extends Expression {
     public String toString() {
         return String.valueOf(this.val);
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        if (other instanceof Literal otherLiteral) {
+            return this.val == otherLiteral.val;
+
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.val);
+    }
 }
 
 class Var extends Expression {
@@ -37,6 +62,29 @@ class Var extends Expression {
     @Override
     public String toString() {
         return this.name;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        if (other instanceof Var otherVar) {
+            return Objects.equals(this.name, otherVar.name);
+
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name);
     }
 }
 
@@ -58,6 +106,29 @@ class Add extends Expression {
     public String toString() {
         return String.format("(%s + %s)", this.lhs.toString(), this.rhs.toString());
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        if (other instanceof Add otherAdd) {
+            return Objects.equals(this.lhs, otherAdd.lhs) && Objects.equals(this.rhs, otherAdd.rhs);
+
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.lhs, this.rhs);
+    }
 }
 
 class Multiply extends Expression {
@@ -77,5 +148,28 @@ class Multiply extends Expression {
     @Override
     public String toString() {
         return String.format("(%s * %s)", this.lhs.toString(), this.rhs.toString());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        if (other instanceof Add otherAdd) {
+            return Objects.equals(this.lhs, otherAdd.lhs) && Objects.equals(this.rhs, otherAdd.rhs);
+
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.lhs, this.rhs);
     }
 }

@@ -3,6 +3,7 @@ package org.example;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.Function;
 
 class DataFlowAnalysisTest {
     static Block program1 =
@@ -16,11 +17,25 @@ class DataFlowAnalysisTest {
             new Assign("x", new Var("y"))
         })));
 
-    @Test
-    public void testLivenessAnalysis() {
-        var cfg = new AtomicCFGBuilder().buildCFG(program1);
-        var livenessAnalysis = new LivenessAnalysis(cfg);
-        Map<Integer, Set<String>> solution = livenessAnalysis.analyze();
+    static Block program2 =
+        new Block(new ArrayList<>(List.of(new Statement[] {
+            new Assign("z", new Add(new Var("a"), new Var("b"))),
+            new Assign("y", new Multiply(new Var("a"), new Var("b"))),
+            new While(
+                new Add(new Var("y"), new Add(new Var("a"), new Var("b"))),
+                new Block(new ArrayList<>(List.of(new Statement[]{
+                    new Assign("a", new Add(new Var("a"), new Literal(1))),
+                    new Assign("x", new Add(new Var("a"), new Var("b"))),
+                })))
+            )
+        })));
+
+    private
+    <T, L extends CompleteUpperSemiLattice<T>>
+    void testAnalysis(Block program, Function<ControlFlowGraph,DataFlowAnalysis<T,L>> analysisBuilder) {
+        var cfg = new AtomicCFGBuilder().buildCFG(program);
+        var analysis = analysisBuilder.apply(cfg);
+        var solution = analysis.analyze();
 
         for (BasicBlock block : cfg.blockList()) {
             System.out.printf("%d => %s\n%s\n\n", block.id, solution.get(block.id), block);
@@ -28,13 +43,17 @@ class DataFlowAnalysisTest {
     }
 
     @Test
-    public void testSignAnalysis() {
-        var cfg = new AtomicCFGBuilder().buildCFG(program1);
-        var signAnalysis = new SignAnalysis(cfg);
-        Map<Integer, Map<String, Sign>> solution = signAnalysis.analyze();
+    public void testLivenessAnalysis() {
+        testAnalysis(program1, LivenessAnalysis::new);
+    }
 
-        for (BasicBlock block : cfg.blockList()) {
-            System.out.printf("%d => %s\n%s\n\n", block.id, solution.get(block.id), block);
-        }
+    @Test
+    public void testSignAnalysis() {
+        testAnalysis(program1, SignAnalysis::new);
+    }
+
+    @Test
+    public void testAvailableExpressionsAnalysis() {
+        testAnalysis(program2, AvailableExpressionsAnalysis::new);
     }
 }

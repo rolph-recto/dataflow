@@ -35,6 +35,7 @@ class ExpressionVariables implements ValueExpressionVisitor<Set<String>> {
     }
 }
 
+/** Returns all variables referenced in the statement. */
 class StatementVariables extends ExpressionVariables implements ValueStatementVisitor<Set<String>, Set<String>> {
     @Override
     public Set<String> visitAssign(String var, Set<String> rhs) {
@@ -66,6 +67,61 @@ class StatementVariables extends ExpressionVariables implements ValueStatementVi
         var res = new HashSet<String>();
         for (var child : statements) {
             res.addAll(child);
+        }
+        return res;
+    }
+}
+
+/** Returns all complex expressions from a statement. */
+class ComplexExpressions implements StatementVisitor<Set<Expression>>, ExpressionVisitor<Set<Expression>> {
+    @Override
+    public Set<Expression> visit(Literal expr) {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<Expression> visit(Var expr) {
+        return new HashSet<>();
+    }
+
+    @Override
+    public Set<Expression> visit(Add expr) {
+        var res = new HashSet<Expression>();
+        res.add(expr);
+        res.addAll(expr.lhs.accept(this));
+        res.addAll(expr.rhs.accept(this));
+        return res;
+    }
+
+    @Override
+    public Set<Expression> visit(Multiply expr) {
+        var res = new HashSet<Expression>();
+        res.add(expr);
+        res.addAll(expr.lhs.accept(this));
+        res.addAll(expr.rhs.accept(this));
+        return res;
+    }
+
+    @Override
+    public Set<Expression> visit(Assign stmt) {
+        return stmt.rhs.accept(this);
+    }
+
+    @Override
+    public Set<Expression> visit(Conditional stmt) {
+        return stmt.guard.accept(this);
+    }
+
+    @Override
+    public Set<Expression> visit(While stmt) {
+        return stmt.guard.accept(this);
+    }
+
+    @Override
+    public Set<Expression> visit(Block stmt) {
+        var res = new HashSet<Expression>();
+        for (var child : stmt.statements) {
+            res.addAll(child.accept(this));
         }
         return res;
     }
