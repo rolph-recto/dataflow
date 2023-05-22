@@ -24,7 +24,25 @@ class Assign extends AtomicStatement {
 
     @Override
     public String toString() {
-        return String.format("%s := %s", this.var, this.rhs.toString());
+        return String.format("%s := %s", this.var, this.rhs);
+    }
+}
+
+class Output extends AtomicStatement {
+    Expression expr;
+
+    Output(Expression expr) {
+        this.expr = expr;
+    }
+
+    @Override
+    <T> T accept(StatementVisitor<T> v) {
+        return v.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("output(%s)", this.expr);
     }
 }
 

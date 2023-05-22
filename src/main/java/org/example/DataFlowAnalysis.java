@@ -79,6 +79,16 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
             return initial();
         }
 
+        return transfer(block, input);
+    }
+
+    /** Value for the entry (resp. exist) block for a forward (resp. backward) analysis.
+     *  By default, this is lattice.bottom(). */
+    T initial() {
+        return this.lattice.bottom();
+    }
+
+    T transfer(BasicBlock block, T input) {
         // assume that CFG blocks are atomic (contains either 0 or 1 statements)
         if (block.statements.size() == 0) {
             // if there is a conditional jump, apply transfer function of the guard
@@ -97,15 +107,13 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
         }
     }
 
-    /** Value for the entry (resp. exist) block for a forward (resp. backward) analysis.
-     *  By default, this is lattice.bottom(). */
-    T initial() {
-        return this.lattice.bottom();
+    /** Transfer function for a statement. */
+    T transfer(AtomicStatement statement, T input) {
+        return input;
     }
 
-    /** Transfer function for a statement. */
-    abstract T transfer(AtomicStatement statement, T input);
-
     /** Transfer function for a conditional / loop guard. */
-    abstract T transfer(Expression guard, T input);
+    T transfer(Expression guard, T input) {
+        return input;
+    }
 }

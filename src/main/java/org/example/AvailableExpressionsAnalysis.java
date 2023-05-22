@@ -47,6 +47,11 @@ class AvailableExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>, Rev
 
             return res;
 
+        } else if (statement instanceof Output output) {
+            var res = new HashSet<>(input);
+            res.addAll(output.expr.accept(new ComplexExpressions()));
+            return res;
+
         } else {
             throw new RuntimeException("unreachable");
         }

@@ -3,16 +3,24 @@ package org.example;
 import java.util.List;
 import java.util.stream.Collectors;
 
-interface StatementVisitor<T> {
+interface AtomicStatementVisitor<T> {
     T visit(Assign stmt);
+    T visit(Output stmt);
+}
+
+interface StatementVisitor<T> extends AtomicStatementVisitor<T> {
     T visit(Conditional stmt);
     T visit(While stmt);
     T visit(Block stmt);
 }
 
-interface ValueStatementVisitor<S, E> extends StatementVisitor<S>, ValueExpressionVisitor<E> {
+interface ValueAtomicStatementVisitor<S, E> extends AtomicStatementVisitor<S>, ValueExpressionVisitor<E> {
     S visitAssign(String var, E rhs);
 
+    S visitOutput(E rhs);
+}
+
+interface ValueStatementVisitor<S, E> extends ValueAtomicStatementVisitor<S, E>, StatementVisitor<S> {
     S visitConditional(E guard, S thenBranch, S elseBranch);
 
     S visitWhile(E guard, S body);
@@ -22,6 +30,11 @@ interface ValueStatementVisitor<S, E> extends StatementVisitor<S>, ValueExpressi
     @Override
     default S visit(Assign stmt) {
         return visitAssign(stmt.var, stmt.rhs.accept(this));
+    }
+
+    @Override
+    default S visit(Output stmt) {
+        return visitOutput(stmt.expr.accept(this));
     }
 
     @Override

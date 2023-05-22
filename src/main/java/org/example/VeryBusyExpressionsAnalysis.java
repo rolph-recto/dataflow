@@ -49,6 +49,13 @@ class VeryBusyExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>,Rever
 
             return res;
 
+        } else if (statement instanceof Output output) {
+            // all complex expressions on the RHS of the assignment have been computed for the assignment,
+            // and thus are available after the assignment
+            var res = new HashSet<>(input);
+            res.addAll(output.expr.accept(new ComplexExpressions()));
+            return res;
+
         } else {
             throw new RuntimeException("unreachable");
         }

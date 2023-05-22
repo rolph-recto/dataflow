@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.function.Function;
+
 class DataFlowAnalysisTest {
     static Block program1 =
         new Block(new ArrayList<>(List.of(new Statement[] {
@@ -36,11 +37,39 @@ class DataFlowAnalysisTest {
             new While(
                 new Add(new Var("x"), new Literal(0)),
                 new Block(new ArrayList<>(List.of(new Statement[]{
-                    new Assign("output", new Add(new Multiply(new Var("a"), new Var("b")), new Var("x"))),
+                    new Output(new Add(new Multiply(new Var("a"), new Var("b")), new Var("x"))),
                     new Assign("x", new Add(new Var("x"), new Literal(1))),
                 })))
             ),
-            new Assign("output", new Multiply(new Var("a"), new Var("b")))
+            new Output(new Multiply(new Var("a"), new Var("b")))
+        })));
+
+    static Block program4 =
+        new Block(new ArrayList<>(List.of(new Statement[] {
+            new Assign("x", new Literal(5)),
+            new While(
+                new Add(new Var("x"), new Literal(1)),
+                new Block(new ArrayList<>(List.of(new Statement[]{
+                    new Assign("y", new Add(new Var("x"), new Literal(2))),
+                    new Conditional(
+                        new Add(new Var("y"), new Literal(3)),
+                        new Block(new ArrayList<>(List.of(new Statement[] {
+                            new Assign("x", new Add(new Var("x"), new Var("y")))
+                        }))),
+                        new Block(new ArrayList<>())
+                    ),
+                    new Assign("z", new Add(new Var("x"), new Literal(4))),
+                    new Conditional(
+                        new Add(new Var("z"), new Literal(0)),
+                        new Block(new ArrayList<>(List.of(new Statement[] {
+                            new Assign("x", new Add(new Var("x"), new Literal(2)))
+                        }))),
+                        new Block(new ArrayList<>())
+                    ),
+                    new Assign("z", new Add(new Var("x"), new Literal(1)))
+                })))
+            ),
+            new Output(new Var("x"))
         })));
 
     private
@@ -73,5 +102,10 @@ class DataFlowAnalysisTest {
     @Test
     public void testVeryBusyExpressionsAnalysis() {
         testAnalysis(program3, VeryBusyExpressionsAnalysis::new);
+    }
+
+    @Test
+    public void testReachingDefinitionsAnalysis() {
+        testAnalysis(program4, ReachingDefinitionsAnalysis::new);
     }
 }

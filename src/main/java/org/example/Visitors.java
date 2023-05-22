@@ -46,6 +46,11 @@ class StatementVariables extends ExpressionVariables implements ValueStatementVi
     }
 
     @Override
+    public Set<String> visitOutput(Set<String> expr) {
+        return expr;
+    }
+
+    @Override
     public Set<String> visitConditional(Set<String> guard, Set<String> thenBranch, Set<String> elseBranch) {
         var res = new HashSet<String>();
         res.addAll(guard);
@@ -105,6 +110,11 @@ class ComplexExpressions implements StatementVisitor<Set<Expression>>, Expressio
     @Override
     public Set<Expression> visit(Assign stmt) {
         return stmt.rhs.accept(this);
+    }
+
+    @Override
+    public Set<Expression> visit(Output stmt) {
+        return stmt.expr.accept(this);
     }
 
     @Override
