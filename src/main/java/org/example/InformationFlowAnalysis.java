@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/** Evaluate security level of an expression with respective to a store. */
 class InformationFlowEvalVisitor implements ValueExpressionVisitor<SecurityLevel> {
     Map<String, SecurityLevel> store;
 
@@ -42,7 +43,8 @@ class InformationFlowEvalVisitor implements ValueExpressionVisitor<SecurityLevel
 /** Forward may-analysis that checks the security levels of computations.
  *  This is similar to a sign analysis.
  *  This only captures direct flows; it does not have the standard PC label machinery for
- *  implicit flows through control. */
+ *  implicit flows through control.
+ *  Unlike standard IFC type sustems, this analysis is *flow-sensitive*, so variables can change labels. */
 class InformationFlowAnalysis extends BasicDataFlowAnalysis<Map<String,SecurityLevel>, StoreLattice<SecurityLevel, SecurityLattice>>
 {
     InformationFlowAnalysis(ControlFlowGraph cfg) {
