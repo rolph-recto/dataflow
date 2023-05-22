@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.*;
 
+/** Unique assignment in a program. */
 class Definition {
     int id;
     String var;
@@ -40,6 +41,7 @@ class Definition {
     }
 }
 
+/** Forward may-analysis that computes definitions (assignments) that could have influenced store at a program point. */
 class ReachingDefinitionsAnalysis extends DataFlowAnalysis<Set<Definition>, PowersetLattice<Definition>> {
     ReachingDefinitionsAnalysis(ControlFlowGraph cfg) {
         super(new PowersetLattice<>(), cfg, DataFlowDirection.FORWARD);
