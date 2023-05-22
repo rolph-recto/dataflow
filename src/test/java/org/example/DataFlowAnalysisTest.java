@@ -1,5 +1,6 @@
 package org.example;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -72,6 +73,12 @@ class DataFlowAnalysisTest {
             new Output(new Var("x"))
         })));
 
+    static Block program5 =
+        new Block(new ArrayList<>(List.of(new Statement[]{
+            new Assign("x", new Input()),
+            new Output(new Var("x"))
+        })));
+
     private
     <T, L extends CompleteUpperSemiLattice<T>>
     void testAnalysis(Block program, Function<ControlFlowGraph,DataFlowAnalysis<T,L>> analysisBuilder) {
@@ -105,7 +112,14 @@ class DataFlowAnalysisTest {
     }
 
     @Test
-    public void testReachingDefinitionsAnalysis() {
-        testAnalysis(program4, ReachingDefinitionsAnalysis::new);
+    public void testInformationFlowAnalysis() {
+        var cfg = new AtomicCFGBuilder().buildCFG(program4);
+        Assertions.assertTrue(InformationFlowChecker.check(cfg));
+    }
+
+    @Test
+    public void testInformationFlowAnalysi2() {
+        var cfg = new AtomicCFGBuilder().buildCFG(program5);
+        Assertions.assertFalse(InformationFlowChecker.check(cfg));
     }
 }

@@ -7,6 +7,11 @@ import java.util.Set;
 /** Return the set of variables referenced in an expression. */
 class ExpressionVariables implements ValueExpressionVisitor<Set<String>> {
     @Override
+    public Set<String> visitInput() {
+        return new HashSet<>();
+    }
+
+    @Override
     public Set<String> visitLiteral(int value) {
         return new HashSet<>();
     }
@@ -79,6 +84,11 @@ class StatementVariables extends ExpressionVariables implements ValueStatementVi
 
 /** Returns all complex expressions from a statement. */
 class ComplexExpressions implements StatementVisitor<Set<Expression>>, ExpressionVisitor<Set<Expression>> {
+    @Override
+    public Set<Expression> visit(Input expr) {
+        return new HashSet<>();
+    }
+
     @Override
     public Set<Expression> visit(Literal expr) {
         return new HashSet<>();

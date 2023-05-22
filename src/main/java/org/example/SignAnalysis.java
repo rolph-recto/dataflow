@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 /** computes the sign of variables at specific program points. */
-public class SignAnalysis extends DataFlowAnalysis<Map<String, Sign>, StoreLattice<Sign, SignLattice>> {
+public class SignAnalysis extends BasicDataFlowAnalysis<Map<String, Sign>, StoreLattice<Sign, SignLattice>> {
     SignAnalysis(ControlFlowGraph cfg) {
         super(new StoreLattice<>(new SignLattice(), cfgVariables(cfg)), cfg, DataFlowDirection.FORWARD);
     }
@@ -25,7 +25,7 @@ public class SignAnalysis extends DataFlowAnalysis<Map<String, Sign>, StoreLatti
     }
 
     private Sign eval(Map<String, Sign> store, Expression expr) {
-        return expr.accept(new SignVisitor(store));
+        return expr.accept(new EvalVisitor(store));
     }
 
     @Override
@@ -41,15 +41,21 @@ public class SignAnalysis extends DataFlowAnalysis<Map<String, Sign>, StoreLatti
     }
 
     @Override
-    Map<String, Sign> transfer(Expression guard, Map<String, Sign> input) {
+    Map<String, Sign> transfer(Expression expr, Map<String, Sign> input) {
+        // conditional / loop guards don't change the abstract state, just propagate input
         return input;
     }
 
-    private static class SignVisitor implements ValueExpressionVisitor<Sign> {
+    private static class EvalVisitor implements ValueExpressionVisitor<Sign> {
         Map<String, Sign> store;
 
-        SignVisitor(Map<String, Sign> store) {
+        EvalVisitor(Map<String, Sign> store) {
             this.store = store;
+        }
+
+        @Override
+        public Sign visitInput() {
+            return Sign.UNKNOWN;
         }
 
         @Override

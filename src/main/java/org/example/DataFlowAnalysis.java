@@ -88,6 +88,14 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
         return this.lattice.bottom();
     }
 
+    abstract T transfer(BasicBlock block, T input);
+}
+
+abstract class BasicDataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> extends DataFlowAnalysis<T, L> {
+    BasicDataFlowAnalysis(L lattice, ControlFlowGraph cfg, DataFlowDirection direction) {
+        super(lattice, cfg, direction);
+    }
+
     T transfer(BasicBlock block, T input) {
         // assume that CFG blocks are atomic (contains either 0 or 1 statements)
         if (block.statements.size() == 0) {
@@ -108,12 +116,8 @@ abstract class DataFlowAnalysis<T, L extends CompleteUpperSemiLattice<T>> implem
     }
 
     /** Transfer function for a statement. */
-    T transfer(AtomicStatement statement, T input) {
-        return input;
-    }
+    abstract T transfer(AtomicStatement statement, T input);
 
     /** Transfer function for a conditional / loop guard. */
-    T transfer(Expression guard, T input) {
-        return input;
-    }
+    abstract T transfer(Expression guard, T input);
 }

@@ -47,6 +47,28 @@ class Literal extends Expression {
     }
 }
 
+class Input extends Expression {
+    @Override
+    <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+
+        }  else{
+            return other instanceof Input;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "input";
+    }
+}
+
 class Var extends Expression {
     String name;
 

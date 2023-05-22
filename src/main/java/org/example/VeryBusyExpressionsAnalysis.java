@@ -6,7 +6,7 @@ import java.util.Set;
 
 /** Backwards must-analysis that computes for every program point expressions that will definitely be computed
  * again in the future. Similar to available expressions analysis, but backwards! */
-class VeryBusyExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>,ReversePowersetLattice<Expression>> {
+class VeryBusyExpressionsAnalysis extends BasicDataFlowAnalysis<Set<Expression>,ReversePowersetLattice<Expression>> {
     VeryBusyExpressionsAnalysis(ControlFlowGraph cfg) {
         super(new ReversePowersetLattice<>(programExpressions(cfg)), cfg, DataFlowDirection.BACKWARD);
     }

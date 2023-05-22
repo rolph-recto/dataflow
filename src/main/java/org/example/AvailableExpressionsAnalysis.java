@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /** Forward must-analysis that computes expressions that are *definitely* available at a program point. */
-class AvailableExpressionsAnalysis extends DataFlowAnalysis<Set<Expression>, ReversePowersetLattice<Expression>> {
+class AvailableExpressionsAnalysis extends BasicDataFlowAnalysis<Set<Expression>, ReversePowersetLattice<Expression>> {
     AvailableExpressionsAnalysis(ControlFlowGraph cfg) {
         super(new ReversePowersetLattice<>(programExpressions(cfg)), cfg, DataFlowDirection.FORWARD);
     }

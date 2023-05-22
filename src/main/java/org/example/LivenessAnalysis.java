@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Backwards may-analysis that computes live variables at every program point. */
-class LivenessAnalysis extends DataFlowAnalysis<Set<String>, PowersetLattice<String>> {
+class LivenessAnalysis extends BasicDataFlowAnalysis<Set<String>, PowersetLattice<String>> {
     LivenessAnalysis(ControlFlowGraph cfg) {
         super(new PowersetLattice<>(), cfg, DataFlowDirection.BACKWARD);
     }

@@ -51,13 +51,8 @@ class ReachingDefinitionsAnalysis extends DataFlowAnalysis<Set<Definition>, Powe
     Set<Definition> transfer(BasicBlock block, Set<Definition> input) {
         // assume that CFG blocks are atomic (contains either 0 or 1 statements)
         if (block.statements.size() == 0) {
-            // if there is a conditional jump, apply transfer function of the guard
-            if (block.jump instanceof ConditionalJump) {
-                return transfer(((ConditionalJump)block.jump).guard, input);
-
-            } else {
-                return input;
-            }
+            // conditional / while block; just propagate input
+            return input;
 
         } else if (block.statements.size() == 1) {
             return transfer(block.id, block.statements.element(), input);

@@ -1,6 +1,7 @@
 package org.example;
 
 interface ExpressionVisitor<T> {
+    T visit(Input expr);
     T visit(Literal expr);
     T visit(Add expr);
     T visit(Multiply expr);
@@ -9,10 +10,16 @@ interface ExpressionVisitor<T> {
 
 /** base class that contains abstract traversal logic for an expression visitor. */
 interface ValueExpressionVisitor<T> extends ExpressionVisitor<T> {
+    T visitInput();
     T visitLiteral(int value);
     T visitVar(String name);
     T visitAdd(T lhs, T rhs);
     T visitMultiply(T lhs, T rhs);
+
+    @Override
+    default T visit(Input expr) {
+        return visitInput();
+    }
 
     @Override
     default T visit(Literal expr) {
